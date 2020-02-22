@@ -1,0 +1,33 @@
+version: '2.2'
+
+services:
+  reverse-proxy:
+    image: gcr.io/passport-tree-app-268922/reverse-proxy:latest
+    ports:
+      - 8080:8080
+    depends_on: 
+      - tree-view-ui
+      - tree-view-backend
+  tree-view-backend:
+    image: gcr.io/passport-tree-app-268922/tree-view-backend:latest
+    environment:
+      - DB_PASSWORD=${DB_PASSWORD}
+    ports:
+      - 3000:3000
+    depends_on:
+      - treeviewdb
+  tree-view-ui:
+    image: gcr.io/passport-tree-app-268922/tree-view-ui:latest
+    ports:
+      - 3001:80
+  treeviewdb:
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    image: postgres:10.4
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
